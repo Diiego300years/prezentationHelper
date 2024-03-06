@@ -20,7 +20,7 @@ function addSlideIndex(presentationName) {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ presentationName: "sample_1.pptx" }),
+    body: JSON.stringify({ "presentationName": "sample_1.pptx" }),
     // body: JSON.stringify({ presentationName }),
   })
     .then((response) => {

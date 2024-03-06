@@ -1,4 +1,3 @@
-
 // Ścieżka do pliku .pptx
 let presentationName = "sample_1.pptx";
 
@@ -14,31 +13,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-
 function addSlideIndex(presentationName) {
-  fetch('/unzipPresentation', { // Make sure the URL is correct
-    method: 'POST',
+  fetch("http://localhost:3000/unzipPresentation", {
+    // Make sure the URL is correct
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ presentationName }),
+    body: JSON.stringify({ presentationName: "sample_1.pptx" }),
+    // body: JSON.stringify({ presentationName }),
   })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok ' + response.statusText);
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log(data.message);
-    // Handle the response data here
-  })
-  .catch(error => {
-    console.error("Error:", error);
-  });
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok " + response.statusText);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data.message);
+      // Handle the response data here
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
-
-
 
 // function addSlideIndex(prezentationName) {
 //   const slidesDir = path.join(tmpDir, "ppt/slides");

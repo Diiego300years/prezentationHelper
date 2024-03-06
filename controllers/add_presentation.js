@@ -1,56 +1,77 @@
-const AdmZip = require("adm-zip");
-const { response } = require("express");
-const fs = require("fs");
-const path = require("path");
-const xml2js = require("xml2js");
-const fsa = require("fs").promises;
+import AdmZip from "adm-zip";
+import fs from "fs/promises";
+import path from "path";
 
-// This funciton is checking if directory exist.
-export async function checkIfDirectoryExists(presentationName) {
-  const dirPath = path.join("./unzipped", presentationName);
+async function checkIfFolderExists(presentationName) {
+  // This function should chceck if file added by user exist and return asnwers.
+  // param :: presentationName = input from user.
 
   try {
-    await fsa.access(dirPath);
-    return true;
+    const filePath = path.join("/app/unzipped/", presentationName);
+    const answer = await fs.stat(filePath);
+    if (answer.isDirectory()) {
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
     return false;
   }
 }
 
-// This function return unzipped prezentation.
-async function unzipPrezentation(prezentationName) {
-  let pptxFilePath = `./presentations/${prezentationName}`;
+async function checkIfFileExists(presentationName) {
+  // This function should chceck if file added by user exist and return asnwers.
+  // param :: presentationName = input from user.
 
-  // Otwarcie pliku .pptx jako archiwum ZIP
-  const zip = new AdmZip(pptxFilePath);
-
-  // Wypakowanie zawartości do katalogu z nazwą prezentacji.
-  const tmpDir = `./unzipped/${prezentationName}`;
-
-  // Użycie await, aby poczekać na wynik sprawdzenia istnienia folderu
-  if (await checkIfDirectoryExists(prezentationName)) {
-    let my_response = "This folder exist!";
-    console.log(my_response);
-    // return my_response; // Zakończenie funkcji, jeśli folder istnieje
-    return;
-  } else {
-    try {
-      zip.extractAllTo(tmpDir, true);
-      // Opcjonalnie: Usuwanie tymczasowego katalogu po zakończeniu
-      // fs.rmdirSync(tmpDir, { recursive: true });
-      console.log(
-        `Unzipped to ${tmpDir} presentation named: ${prezentationName}`
-      );
-    } catch (err) {
-      console.log(
-        `In file ${path.basename(__filename)} an error occurred: ${err}`
-      );
+  try {
+    const filePath = path.join("/app/presentations/", presentationName);
+    const answer = await fs.stat(filePath);
+    if (answer.isDirectory()) {
+      return true;
+    } else {
+      return false;
     }
+  } catch (error) {
+    return false;
+  }
+}
+
+// For unzipping
+async function unzippigPresentation(presentationName, res) {
+  try {
+    let pptxFilePath = path.join("/app/presentations/", presentationName);
+
+    if (await checkIfFileExists(pptxFilePath)) {
+      const tmpDir = `/app/unzipped/${presentationName}`;
+
+      if (await checkIfFolderExists(presentationName)) {
+        const zip = new AdmZip(pptxFilePath);
+
+        zip.extractAllTo(tmpDir, true);
+        console.log(
+          `Unzipped to ${tmpDir} presentation named: ${presentationName}`
+        );
+        // 201 for created f.e. in db // Wysyłanie odpowiedzi JSON
+        return res
+          .status(201)
+          .json({ message: "Presentation unzipped successfully" });
+        // return true;
+      } else {
+        return res.status(409).json({ message: "Presentation already exist" });
+      }
+    } else {
+      return res.status(409).json({
+        message: 'Presentation does not exist in "presentations" folder.',
+      });
+    }
+  } catch (err) {
+    console.error(`An error occurred: ${err}`);
+    return res.status(500).json({ message: "Internal server error" });
   }
 }
 
 // Export function
-module.exports.unzipPrezentation = unzipPrezentation;
+export { unzippigPresentation };
 
 // Wywołanie asynchronicznej funkcji
-// unzipPrezentation("sample_2.pptx");
+// unzipPresentation("sample_2.pptx");

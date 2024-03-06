@@ -14,7 +14,7 @@ COPY . .
 RUN npm install
 
 # Starting our application, typically index.js but I'm PYTHON LOVER.
-CMD [ "node", "app.js" ]
+CMD [ "node", "--inspect", "app.js" ]
 
 # Exposing server port
 EXPOSE 3000
